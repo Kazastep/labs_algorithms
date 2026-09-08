@@ -78,6 +78,20 @@ def array_max(a: list[int]) -> int:
 
     return max_in_arr       # O(1)
 
+def array_max_recur(a: list[int]) -> int:
+    """Максимум массива (массив непуст). Ожидаемая сложность: Θ(n log n)."""
+    max_int = a[0]
+    n = len(a)
+
+    if len(a) == 1:
+        return max_int
+
+    left_max = array_max_recur(a[:n//2])
+    right_max = array_max_recur(a[n//2:])
+    if left_max > right_max:
+        return left_max
+    return right_max
+
 
 def count_equal_pairs(a: list[int]) -> int:
     """Число пар (i, j), i < j, таких что a[i] == a[j]. Ожидаемая сложность: TODO."""
