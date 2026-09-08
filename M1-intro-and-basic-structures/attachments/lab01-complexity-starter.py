@@ -96,7 +96,16 @@ def array_max_recur(a: list[int]) -> int:
 def count_equal_pairs(a: list[int]) -> int:
     """Число пар (i, j), i < j, таких что a[i] == a[j]. Ожидаемая сложность: TODO."""
     # TODO: реализовать двойным циклом
-    raise NotImplementedError
+    s = 0                           # O(1)
+    n = len(a)                      # O(1)
+    for i in range(n):              # выполняется от n O(n)
+
+        for j in range(i+1,n):      # выполняется от n-1 O(n)
+
+            if a[i] == a[j]:        # O(1)
+                s += 1              # O(1)
+
+    return s                        # O(1)
 
 
 def binary_pow(x: int, n: int, mod: int | None = None) -> int:
