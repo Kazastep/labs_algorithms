@@ -115,7 +115,30 @@ def binary_pow(x: int, n: int, mod: int | None = None) -> int:
     """
     # TODO: реализовать через квадрирование; при mod применять % mod после
     # каждого умножения
-    raise NotImplementedError
+    result = 1
+
+    if mod is not None:
+        result %= mod                      
+
+    while n > 0:                    
+
+        if n % 2 != 0:              
+            n -= 1                 
+            result *= x             
+
+            n //= 2
+            x **= 2
+            if mod is not None:
+                result %= mod
+                x %= mod
+
+        else:
+            n //= 2
+            x **= 2
+            if mod is not None:
+                x %= mod
+
+    return result
 
 
 # ---------------------------------------------------------------------------
