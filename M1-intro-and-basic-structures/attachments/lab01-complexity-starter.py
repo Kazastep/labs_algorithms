@@ -71,7 +71,12 @@ def array_sum(a: list[int]) -> int:
 def array_max(a: list[int]) -> int:
     """Максимум массива (массив непуст). Ожидаемая сложность: TODO."""
     # TODO: реализовать циклом
-    raise NotImplementedError
+    max_in_arr = a[0]       # O(1)
+    for i in a:         # выполняется n раз
+        if i > max_in_arr:  # O(1)
+            max_in_arr = i  # O(1)
+
+    return max_in_arr       # O(1)
 
 
 def count_equal_pairs(a: list[int]) -> int:
