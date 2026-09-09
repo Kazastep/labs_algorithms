@@ -60,32 +60,85 @@ POW_CALLS = 20_000    # вызовов binary_pow на один замер: ин
 
 
 def array_sum(a: list[int]) -> int:
-    """Сумма элементов массива. Ожидаемая сложность: TODO (обосновать в отчёте)."""
+    """Сумма элементов массива. Ожидаемая сложность: Θ(n), O(n)."""
     # TODO: реализовать циклом
-    
-    raise NotImplementedError
+    suum = 0            # O(1)
+    for i in a:         # n итераций
+        suum += i       # O(1)
+    return suum         # O(1)
 
 
 def array_max(a: list[int]) -> int:
-    """Максимум массива (массив непуст). Ожидаемая сложность: TODO."""
+    """Максимум массива (массив непуст). Ожидаемая сложность: Θ(n), O(n)."""
     # TODO: реализовать циклом
-    raise NotImplementedError
+    max_in_arr = a[0]       # O(1)
+    for i in a:         # выполняется n раз
+        if i > max_in_arr:  # O(1)
+            max_in_arr = i  # O(1)
+
+    return max_in_arr       # O(1)
+
+def array_max_recur(a: list[int]) -> int:
+    """Максимум массива (массив непуст). Ожидаемая сложность: Θ(n log n)."""
+    max_int = a[0]
+    n = len(a)
+
+    if len(a) == 1:
+        return max_int
+
+    left_max = array_max_recur(a[:n//2])
+    right_max = array_max_recur(a[n//2:])
+    if left_max > right_max:
+        return left_max
+    return right_max
 
 
 def count_equal_pairs(a: list[int]) -> int:
-    """Число пар (i, j), i < j, таких что a[i] == a[j]. Ожидаемая сложность: TODO."""
+    """Число пар (i, j), i < j, таких что a[i] == a[j]. Ожидаемая сложность: O(n^2)."""
     # TODO: реализовать двойным циклом
-    raise NotImplementedError
+    s = 0                           # O(1)
+    n = len(a)                      # O(1)
+    for i in range(n):              # выполняется от n O(n)
+
+        for j in range(i+1,n):      # выполняется от n-1 O(n)
+
+            if a[i] == a[j]:        # O(1)
+                s += 1              # O(1)
+
+    return s                        # O(1)
 
 
 def binary_pow(x: int, n: int, mod: int | None = None) -> int:
-    """Бинарное возведение в степень, n >= 0. Ожидаемая сложность: TODO.
+    """Бинарное возведение в степень, n >= 0. Ожидаемая сложность: O(log n).
 
     При заданном mod все умножения выполняются по модулю (результат x**n % mod).
     """
     # TODO: реализовать через квадрирование; при mod применять % mod после
     # каждого умножения
-    raise NotImplementedError
+    result = 1
+
+    if mod is not None:
+        result %= mod                      
+
+    while n > 0:                    
+
+        if n % 2 != 0:              
+            n -= 1                 
+            result *= x             
+
+            n //= 2
+            x **= 2
+            if mod is not None:
+                result %= mod
+                x %= mod
+
+        else:
+            n //= 2
+            x **= 2
+            if mod is not None:
+                x %= mod
+
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -172,7 +225,43 @@ def self_check() -> None:
 
     # TODO: добавить собственные проверки инвариантов и описать их в отчёте
     # (например: count_equal_pairs на массиве из попарно различных элементов = 0).
-    print("self_check: OK")
+        # Собственные проверки инвариантов
+
+    # Сверка с эталонной реализацией
+    assert array_sum([1, 2, 3, 4]) == sum([1, 2, 3, 4])
+
+    # Сумма не зависит от порядка элементов
+    assert array_sum([1, 2, 3, 4]) == array_sum([4, 3, 2, 1])
+
+    # Сумма объединённых массивов равна сумме их отдельных сумм
+    assert array_sum([1, 2] + [3, 4]) == array_sum([1, 2]) + array_sum([3, 4])
+
+    # Максимум не зависит от порядка элементов
+    assert array_max([1, 8, 3, 5]) == array_max([5, 3, 8, 1])
+
+    # Проверка максимума на отрицательных числах
+    assert array_max([-10, -3, -7]) == -3
+
+    # Сверка с эталонной реализацией
+    assert array_max([1, 8, 3, 5]) == max([1, 8, 3, 5])
+
+    # Если все элементы различны, равных пар нет
+    assert count_equal_pairs([1, 2, 3, 4]) == 0
+
+    # Перестановка элементов не изменяет количество равных пар
+    assert count_equal_pairs([1, 2, 1, 2]) == count_equal_pairs([2, 1, 2, 1])
+
+    # Для степени единицы результат равен основанию
+    assert binary_pow(7, 1) == 7
+
+    # Результат вычисления по модулю должен быть меньше модуля
+    result = binary_pow(2, 20, mod=7)
+    assert 0 <= result < 7
+
+    # Сверка с эталонной реализацией
+    assert binary_pow(2, 10, 5) == pow(2, 10, 5)
+
+    print("new_self_check: OK")
 
 
 # ---------------------------------------------------------------------------
