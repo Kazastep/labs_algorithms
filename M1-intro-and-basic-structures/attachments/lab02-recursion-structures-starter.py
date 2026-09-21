@@ -6,7 +6,7 @@
 в соответствии с КИМ-02 и правилами использования генеративного ИИ
 (docs/ai-verification.md).
 
-Запуск: python lab02-recursion-structures-starter.py --variant N
+Запуск: python3 M1-intro-and-basic-structures/attachments/lab02-recursion-structures-starter.py --variant 10
 """
 from __future__ import annotations
 
@@ -26,9 +26,12 @@ CALLS = {"fib_naive": 0, "fib_memo": 0}  # счётчики рекурсивны
 
 
 def factorial(n: int) -> int:
-    """Факториал n >= 0 рекурсивно. Ожидаемая сложность: TODO (обосновать в отчёте)."""
+    """Факториал n >= 0 рекурсивно. Ожидаемая сложность: Θ(n), O(n)."""
     # TODO: базовое условие + рекурсивный переход
-    raise NotImplementedError
+    if n == 1 or n == 0:
+        return 1
+
+    return factorial(n-1) * n
 
 
 def fib_naive(n: int) -> int:
@@ -38,17 +41,33 @@ def fib_naive(n: int) -> int:
     """
     CALLS["fib_naive"] += 1
     # TODO: F(0)=0, F(1)=1, далее F(n)=F(n-1)+F(n-2)
-    raise NotImplementedError
+    if n == 1 or n == 0:
+        return n
+    return fib_naive(n-1) + fib_naive(n-2)
 
 
 def fib_memo(n: int, memo: dict[int, int] | None = None) -> int:
     """n-е число Фибоначчи с мемоизацией; увеличивает CALLS["fib_memo"].
 
-    Ожидаемая сложность: TODO (линейная — сравнить счётчики в отчёте).
+    Ожидаемая сложность: TODO (линейная — сравнить счётчики в отчёте) O(n).
     """
     CALLS["fib_memo"] += 1
     # TODO: словарь memo передаётся по рекурсии; повторные подзадачи не пересчитываются
-    raise NotImplementedError
+
+    if memo is None:
+        memo = {}
+
+    if n == 1 or n == 0:
+       memo.update({n:n})
+       return n
+
+    if n in memo:
+     return memo[n]
+
+    result = fib_memo(n-1, memo) + fib_memo(n-2, memo)
+    memo.update({n:result})
+
+    return result
 
 
 def hanoi(n: int, src: str = "A", dst: str = "C", aux: str = "B") -> int:
