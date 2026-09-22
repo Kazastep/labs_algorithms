@@ -197,8 +197,6 @@ class Stack:
         peek_data = self._data.get(len(self._data) - 1)
         return peek_data
 
-        
-
 
 class _Node:
     """Узел двусвязного списка для Deque."""
@@ -229,26 +227,69 @@ class Deque:
     def push_front(self, value) -> None:
         """Добавить элемент в начало. Сложность: O(1)."""
         # TODO: создать узел, перевязать ссылки head (учесть пустой дек)
+
         value = _Node(value)
         value.next = self._head
-        self._head = value
-        
-        
 
+        if self._head is not None:
+            self._head.prev = value
+
+        self._head = value
+        if self._tail is None:
+            self._tail = value
+        self._size += 1
+        
     def push_back(self, value) -> None:
-        """Добавить элемент в конец. Сложность: TODO."""
+        """Добавить элемент в конец. Сложность: O(1)."""
         # TODO: симметрично push_front для tail
-        raise NotImplementedError
+
+        value = _Node(value)
+        value.prev = self._tail
+
+        if self._tail is not None:
+            self._tail.next = value
+
+        self._tail = value
+        if self._head is None:
+            self._head = value
+        self._size += 1
 
     def pop_front(self):
         """Извлечь элемент из начала; для пустого дека — IndexError."""
         # TODO: учесть переход к пустому деку (tail тоже обнуляется)
-        raise NotImplementedError
+        if self._head is None:
+            raise IndexError
+        
+        pop_value = self._head.value
+
+        if self._size > 1:
+            self._head = self._head.next
+            self._head.prev = None
+        else:
+            self._head = None
+            self._tail = None
+
+        self._size -= 1
+        return pop_value
 
     def pop_back(self):
         """Извлечь элемент из конца; для пустого дека — IndexError."""
         # TODO
-        raise NotImplementedError
+        if self._tail is None:
+            raise IndexError
+        
+        pop_value = self._tail.value
+
+        if self._size > 1:
+            self._tail = self._tail.prev
+            self._tail.next = None
+        else:
+            self._head = None
+            self._tail = None
+
+        self._size -= 1
+        return pop_value
+        
 
 
 # ---------------------------------------------------------------------------
