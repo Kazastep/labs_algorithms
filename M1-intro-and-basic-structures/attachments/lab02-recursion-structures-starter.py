@@ -76,7 +76,15 @@ def hanoi(n: int, src: str = "A", dst: str = "C", aux: str = "B") -> int:
     Проверка в self_check: число перемещений равно 2**n - 1.
     """
     # TODO: базовое условие n == 0; иначе перенести n-1 на aux, 1 на dst, n-1 на dst
-    raise NotImplementedError
+
+    if n == 0:
+        return n
+
+    left = hanoi(n-1,src,aux,dst)
+
+    right = hanoi(n-1,aux,dst,src)
+
+    return left + 1 + right
 
 
 # ---------------------------------------------------------------------------
@@ -102,6 +110,7 @@ class DynamicArray:
     def __len__(self) -> int:
         return self._size
 
+    # TOCHECK 
     @property
     def capacity(self) -> int:
         return self._capacity
@@ -109,26 +118,45 @@ class DynamicArray:
     def _grow(self) -> None:
         """Увеличить ёмкость в 2 раза и скопировать элементы в новый буфер."""
         # TODO: выделить новый буфер размера 2 * capacity, перенести _size элементов
-        raise NotImplementedError
+        self._capacity *= 2
+        buffer_new = [None] * self._capacity
+
+        for i in range(self._size):
+            buffer_new[i] = self._buffer[i]
+
+        self._buffer = buffer_new
+
 
     def append(self, value) -> None:
         """Добавить элемент в конец; при size == capacity сначала вызвать _grow.
 
-        Амортизированная сложность: TODO (обосновать методом учёта в отчёте).
+        Амортизированная сложность: TODO O(1).
         """
         # TODO: рост при необходимости, запись в ячейку _buffer[_size], инкремент _size
-        raise NotImplementedError
+        if self._size == self.capacity:
+            self._grow()
+
+        self._buffer[self._size] = value
+        self._size += 1
+
+        
 
     def get(self, index: int):
         """Вернуть элемент по индексу 0 <= index < size; иначе IndexError."""
         # TODO: проверка границ + чтение из буфера
-        raise NotImplementedError
+        if index < 0 or index >= self._size:
+            raise IndexError("Index out of range")
+
+        return self._buffer[index]
+
 
     def set(self, index: int, value) -> None:
         """Записать элемент по индексу 0 <= index < size; иначе IndexError."""
         # TODO: проверка границ + запись в буфер
-        raise NotImplementedError
+        if index < 0 or index >= self._size:
+            raise IndexError("Index out of range")
 
+        self._buffer[index] = value
 
 # ---------------------------------------------------------------------------
 # 3. Стек и дек на базе собственных структур
@@ -147,17 +175,29 @@ class Stack:
     def push(self, value) -> None:
         """Положить элемент на вершину. Амортизированная сложность: TODO."""
         # TODO: делегировать DynamicArray.append
-        raise NotImplementedError
+        self._data.append(value)
 
     def pop(self):
         """Снять элемент с вершины; для пустого стека — IndexError."""
         # TODO: прочитать последний элемент, уменьшить размер
-        raise NotImplementedError
+        if len(self._data) == 0:
+            raise IndexError
+
+        value_data = self._data._buffer[self._data._size - 1]
+        self._data._buffer[self._data._size - 1] = None
+        self._data._size -= 1
+        return value_data
 
     def peek(self):
         """Вернуть вершину без удаления; для пустого стека — IndexError."""
         # TODO
-        raise NotImplementedError
+        if len(self._data) == 0:
+            raise IndexError
+
+        peek_data = self._data.get(len(self._data) - 1)
+        return peek_data
+
+        
 
 
 class _Node:
@@ -187,9 +227,13 @@ class Deque:
         return self._size
 
     def push_front(self, value) -> None:
-        """Добавить элемент в начало. Сложность: TODO."""
+        """Добавить элемент в начало. Сложность: O(1)."""
         # TODO: создать узел, перевязать ссылки head (учесть пустой дек)
-        raise NotImplementedError
+        value = _Node(value)
+        value.next = self._head
+        self._head = value
+        
+        
 
     def push_back(self, value) -> None:
         """Добавить элемент в конец. Сложность: TODO."""
