@@ -17,6 +17,8 @@ import random
 import statistics
 import time
 
+import matplotlib.pyplot as plt
+
 # ---------------------------------------------------------------------------
 # 1. Рекурсивные функции (счётчик вызовов — для сравнения наивной рекурсии
 #    и мемоизации; результаты счётчика включаются в отчёт)
@@ -430,17 +432,50 @@ def run_benchmarks(seed: int) -> None:
     rng = random.Random(seed)
     _ = rng.random()  # данные варианта фиксируются seed (см. reproducibility.md)
     print("\nСредняя стоимость append (DynamicArray), демонстрация амортизированной O(1):")
+
+    sizes = []
+    avg_times = []
     for n in SIZES:
         t = bench(appends_dynamic_array, n)
-        print(f"  n={n:>7}  всего t={t:.6f} c  на операцию t/n={t / n:.3e} c")
+
+        sizes.append(n)
+        avg_times.append(t / n * 1_000_000)
+
+        print(f"n={n:>7} всего t={t:.6f} с на операцию t/n={t/n:.3e} с")
+    # вставка в начало list квадратична по суммарному времени
     print("\nВставка в начало: list.insert(0, x) против deque.appendleft:")
     for n in SIZES:
         if n > 30_000:
-            continue  # вставка в начало list квадратична по суммарному времени
+            continue
+
         t_list = bench(inserts_front_list, n)
         t_deque = bench(inserts_front_deque, n)
         t_own = bench(inserts_front_own_deque, n)
-        print(f"  n={n:>7}  list={t_list:.6f} c  deque={t_deque:.6f} c  own_deque={t_own:.6f} c")
+
+        print(
+            f"n={n:>7} "
+            f"list={t_list:.6f} c "
+            f"deque={t_deque:.6f} c "
+            f"own_deque={t_own:.6f} c"
+        )
+    plt.figure(figsize=(9, 5))
+
+    plt.plot(sizes, avg_times, marker="o")
+
+    plt.xscale("log")
+    plt.xlabel("Количество добавлений (n)")
+    plt.ylabel("Среднее время append (мкс)")
+    plt.title("Амортизированная стоимость DynamicArray.append()")
+
+    plt.grid(True)
+    plt.tight_layout()
+
+    plt.savefig("dynamic_array_append.png", dpi=300)
+    plt.show()
+    t_list = bench(inserts_front_list, n)
+    t_deque = bench(inserts_front_deque, n)
+    t_own = bench(inserts_front_own_deque, n)
+    print(f"  n={n:>7}  list={t_list:.6f} c  deque={t_deque:.6f} c  own_deque={t_own:.6f} c")
     # TODO: снять аналогичные замеры для push_front своего Deque;
     # TODO: построить график t/n от n для append и включить его в отчёт;
     # TODO: провести амортизированный анализ push_back методом учёта (в отчёте).
