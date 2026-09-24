@@ -173,7 +173,7 @@ class Stack:
         return len(self._data)
 
     def push(self, value) -> None:
-        """Положить элемент на вершину. Амортизированная сложность: TODO."""
+        """Положить элемент на вершину. Амортизированная сложность:O(1)."""
         # TODO: делегировать DynamicArray.append
         self._data.append(value)
 
@@ -334,6 +334,16 @@ def self_check() -> None:
     while ref:
         assert st.pop() == ref.pop()
     assert len(st) == 0
+    try:
+        st.pop()
+        assert False, "Ожидался IndexError"
+    except IndexError:
+        pass
+    try:
+        st.peek()
+        assert False, "Ожидался IndexError"
+    except IndexError:
+        pass
 
     # --- Deque: порядок FIFO и работа с обоих концов, сверка с collections.deque ---
     dq, ref = Deque(), collections.deque()
@@ -349,6 +359,23 @@ def self_check() -> None:
         assert False, "ожидался IndexError"
     except IndexError:
         pass
+
+    dq.push_back(10)
+    assert dq.pop_front() == 10
+    assert len(dq) == 0
+    assert dq._head is None
+    assert dq._tail is None
+    try:
+        dq.pop_back()
+        assert False, "Ожидался IndexError"
+    except IndexError:
+        pass
+
+    dq.push_front(10)
+    assert dq.pop_back() == 10
+    assert len(dq) == 0
+    assert dq._head is None
+    assert dq._tail is None
     print("self_check: OK")
 
 
@@ -391,6 +418,12 @@ def inserts_front_deque(n: int) -> None:
     for i in range(n):
         d.appendleft(i)
 
+def inserts_front_own_deque(n: int) -> None:
+    """ Собственная функция. Проверка на O(1)."""
+    dq = Deque()
+
+    for i in range(n):
+        dq.push_front(i)
 
 def run_benchmarks(seed: int) -> None:
     """Средняя стоимость append и сравнение вставки в начало list/deque."""
@@ -406,7 +439,8 @@ def run_benchmarks(seed: int) -> None:
             continue  # вставка в начало list квадратична по суммарному времени
         t_list = bench(inserts_front_list, n)
         t_deque = bench(inserts_front_deque, n)
-        print(f"  n={n:>7}  list={t_list:.6f} c  deque={t_deque:.6f} c")
+        t_own = bench(inserts_front_own_deque, n)
+        print(f"  n={n:>7}  list={t_list:.6f} c  deque={t_deque:.6f} c  own_deque={t_own:.6f} c")
     # TODO: снять аналогичные замеры для push_front своего Deque;
     # TODO: построить график t/n от n для append и включить его в отчёт;
     # TODO: провести амортизированный анализ push_back методом учёта (в отчёте).
