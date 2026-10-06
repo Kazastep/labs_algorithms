@@ -23,25 +23,69 @@ import time
 
 
 def bubble_sort(a: list) -> tuple[list, int, int]:
-    """Сортировка пузырьком. Ожидаемая сложность: TODO (обосновать в отчёте).
+    """Сортировка пузырьком. Ожидаемая сложность: O(n^2).
 
     Подсказка: досрочный выход, если за проход не было ни одного обмена, —
     именно он даёт лучший случай на упорядоченном входе.
     """
     # TODO: реализовать; считать сравнения и обмены
-    raise NotImplementedError
+    arr_len = len(a)
+    arr_copy = list(a)
+    comparisons = 0
+    exchange = 0
+    for bypass in range(1,arr_len):
+        swapped = False
+        for k in range(0, arr_len - bypass):
+            comparisons += 1
+            if arr_copy[k] > arr_copy[k+1]:
+                arr_copy[k], arr_copy[k+1] = arr_copy[k+1], arr_copy[k]
+                exchange += 1
+                swapped = True
+        if not swapped:
+            return arr_copy, comparisons, exchange
+    return arr_copy, comparisons, exchange
 
 
 def insertion_sort(a: list) -> tuple[list, int, int]:
-    """Сортировка вставками. Ожидаемая сложность: TODO (лучший/худший случаи)."""
+    """Сортировка вставками. Ожидаемая сложность: TODO O(n) O(n^2)."""
     # TODO: реализовать; считать сравнения и перемещения (сдвиги)
-    raise NotImplementedError
+    arr_len = len(a)
+    arr_copy = list(a)
+    comparisons = 0
+    exchange = 0
+    for top in range(1, arr_len):
+        k = top
+        while k > 0:
+            comparisons += 1
+            if arr_copy[k] < arr_copy[k-1]:
+                arr_copy[k], arr_copy[k-1] = arr_copy[k-1], arr_copy[k]
+                exchange += 1
+                k -= 1
+            else:
+                break
+    return arr_copy, comparisons, exchange
+
 
 
 def selection_sort(a: list) -> tuple[list, int, int]:
-    """Сортировка выбором. Ожидаемая сложность: TODO (почему не зависит от входа?)."""
+    """Сортировка выбором. Ожидаемая сложность: TODO O(n^2)(почему не зависит от входа?)."""
     # TODO: реализовать; считать сравнения и обмены
-    raise NotImplementedError
+    arr_len = len(a)
+    arr_copy = list(a)
+    comparisons = 0
+    exchange = 0
+    
+    for pos in range(0,arr_len - 1):
+        min_index = pos
+        for k in range(pos+1,arr_len):
+            comparisons += 1
+            if arr_copy[k] < arr_copy[min_index]:
+                min_index = k
+        if min_index != pos:
+            arr_copy[pos], arr_copy[min_index] = arr_copy[min_index], arr_copy[pos]
+            exchange += 1
+    
+    return arr_copy, comparisons, exchange
 
 
 # ---------------------------------------------------------------------------
