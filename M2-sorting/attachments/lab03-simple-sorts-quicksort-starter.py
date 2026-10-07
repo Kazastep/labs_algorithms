@@ -22,7 +22,7 @@ import time
 # ---------------------------------------------------------------------------
 
 
-def bubble_sort(a: list) -> tuple[list, int, int]:
+def bubble_sort(a: list, key=lambda x: x) -> tuple[list, int, int]:
     """Сортировка пузырьком. Ожидаемая сложность: O(n^2).
 
     Подсказка: досрочный выход, если за проход не было ни одного обмена, —
@@ -37,7 +37,7 @@ def bubble_sort(a: list) -> tuple[list, int, int]:
         swapped = False
         for k in range(0, arr_len - bypass):
             comparisons += 1
-            if arr_copy[k] > arr_copy[k+1]:
+            if key(arr_copy[k]) > key(arr_copy[k+1]):
                 arr_copy[k], arr_copy[k+1] = arr_copy[k+1], arr_copy[k]
                 exchange += 1
                 swapped = True
@@ -46,7 +46,7 @@ def bubble_sort(a: list) -> tuple[list, int, int]:
     return arr_copy, comparisons, exchange
 
 
-def insertion_sort(a: list) -> tuple[list, int, int]:
+def insertion_sort(a: list, key=lambda x: x) -> tuple[list, int, int]:
     """Сортировка вставками. Ожидаемая сложность: TODO O(n) O(n^2)."""
     # TODO: реализовать; считать сравнения и перемещения (сдвиги)
     arr_len = len(a)
@@ -57,7 +57,7 @@ def insertion_sort(a: list) -> tuple[list, int, int]:
         k = top
         while k > 0:
             comparisons += 1
-            if arr_copy[k] < arr_copy[k-1]:
+            if key(arr_copy[k]) < key(arr_copy[k-1]):
                 arr_copy[k], arr_copy[k-1] = arr_copy[k-1], arr_copy[k]
                 exchange += 1
                 k -= 1
@@ -67,7 +67,7 @@ def insertion_sort(a: list) -> tuple[list, int, int]:
 
 
 
-def selection_sort(a: list) -> tuple[list, int, int]:
+def selection_sort(a: list, key= lambda x: x) -> tuple[list, int, int]:
     """Сортировка выбором. Ожидаемая сложность: TODO O(n^2)(почему не зависит от входа?)."""
     # TODO: реализовать; считать сравнения и обмены
     arr_len = len(a)
@@ -79,7 +79,7 @@ def selection_sort(a: list) -> tuple[list, int, int]:
         min_index = pos
         for k in range(pos+1,arr_len):
             comparisons += 1
-            if arr_copy[k] < arr_copy[min_index]:
+            if key(arr_copy[k]) < key(arr_copy[min_index]):
                 min_index = k
         if min_index != pos:
             arr_copy[pos], arr_copy[min_index] = arr_copy[min_index], arr_copy[pos]
@@ -93,7 +93,7 @@ def selection_sort(a: list) -> tuple[list, int, int]:
 # ---------------------------------------------------------------------------
 
 
-def quick_sort(a: list, rng: random.Random | None = None) -> list:
+def quick_sort(a: list, rng: random.Random | None = None, key= lambda x: x) -> list:
     """QuickSort с выбором опорного через rng.randrange. Возвращает новый список.
 
     Ожидаемая сложность: в среднем O(n log n), в худшем случае O(n^2) (обосновать
@@ -111,11 +111,11 @@ def quick_sort(a: list, rng: random.Random | None = None) -> list:
         return a
 
     target = a[rng.randrange(0, len(a))]
-    less = [n for n in a if n < target]
-    equal = [n for n in a if n == target]
-    great = [n for n in a if n > target]
+    less = [n for n in a if key(n) < key(target)]
+    equal = [n for n in a if key(n) == key(target)]
+    great = [n for n in a if key(n) > key(target)]
 
-    return quick_sort(less, rng) + equal + quick_sort(great,rng)
+    return quick_sort(less, rng, key= key) + equal + quick_sort(great,rng, key= key)
 
 
 
@@ -133,7 +133,8 @@ def stability_demo() -> None:
     ключах. Вывод о стабильности каждой сортировки включить в отчёт.
     """
     # TODO: подготовить пары, прогнать все четыре сортировки, напечатать итог
-    raise NotImplementedError
+    pairs = [(2, "a"), (1, "b"), (2, "c"), (1, "d")]
+    
 
 
 # ---------------------------------------------------------------------------
