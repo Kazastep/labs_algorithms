@@ -6,7 +6,7 @@
 в соответствии с КИМ-03 и правилами использования генеративного ИИ
 (docs/ai-verification.md).
 
-Запуск: python lab03-simple-sorts-quicksort-starter.py --variant N
+Запуск: python3 lab03-simple-sorts-quicksort-starter.py --variant 10
 """
 from __future__ import annotations
 
@@ -14,6 +14,7 @@ import argparse
 import random
 import statistics
 import time
+import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------------
 # 1. Простые сортировки со счётчиками (сортируют КОПИЮ входа, вход не меняют)
@@ -110,7 +111,17 @@ def quick_sort(a: list, rng: random.Random | None = None, key= lambda x: x) -> l
     if len(a) < 2:
         return a
 
-    target = a[rng.randrange(0, len(a))]
+    if len(a) == 2:
+        if key(a[0]) <= key(a[1]):
+            return a
+        return [a[1], a[0]]
+
+    if len(a) <= 3:
+        target = a[1]
+
+    else:
+        target = a[rng.randrange(1, len(a) - 1)]
+
     less = [n for n in a if key(n) < key(target)]
     equal = [n for n in a if key(n) == key(target)]
     great = [n for n in a if key(n) > key(target)]
@@ -134,6 +145,35 @@ def stability_demo() -> None:
     """
     # TODO: подготовить пары, прогнать все четыре сортировки, напечатать итог
     pairs = [(2, "a"), (1, "b"), (2, "c"), (1, "d")]
+
+    bubble_result, _, _ = bubble_sort(
+        pairs,
+        key=lambda p: p[0]
+    )
+
+    insertion_result, _, _ = insertion_sort(
+        pairs,
+        key=lambda p: p[0]
+    )
+
+    selection_result, _, _ = selection_sort(
+        pairs,
+        key=lambda p: p[0]
+    )
+
+    rng = random.Random(40)
+
+    quick_result = quick_sort(
+        pairs,
+        rng=rng,
+        key=lambda p: p[0]
+    )
+
+    print("Исходный:", pairs)
+    print("Bubble:", bubble_result)
+    print("Insertion:", insertion_result)
+    print("Selection:", selection_result)
+    print("Quick:", quick_result)
     
 
 
@@ -221,18 +261,47 @@ def bench(fn, data: list) -> float:
 
 
 def run_benchmarks(seed: int) -> None:
-    """Замеры всех алгоритмов на трёх классах входов; результат — таблица в stdout."""
     plans = [
         ("bubble_sort", ALGORITHMS["bubble_sort"], SIZES_QUADRATIC),
         ("insertion_sort", ALGORITHMS["insertion_sort"], SIZES_QUADRATIC),
         ("selection_sort", ALGORITHMS["selection_sort"], SIZES_QUADRATIC),
         ("quick_sort", lambda a: quick_sort(a, random.Random(seed)), SIZES_QUICK),
     ]
+
     for name, fn, sizes in plans:
+
+        results = {
+            "упорядоченный": [],
+            "случайный": [],
+            "обратный": [],
+        }
+
         print(f"\n{name}:")
+
         for n in sizes:
             for cls, data in make_inputs(n, seed).items():
-                print(f"  n={n:>7}  вход={cls:<13} t={bench(fn, data):.6f} c")
+
+                time_result = bench(fn, data)
+
+                print(
+                    f"  n={n:>7}  вход={cls:<13} "
+                    f"t={time_result:.6f} c"
+                )
+
+                results[cls].append((n, time_result))
+
+        for cls, values in results.items():
+            x = [point[0] for point in values]
+            y = [point[1] for point in values]
+
+            plt.loglog(x, y, marker="o", label=cls)
+
+        plt.xlabel("Размер входа n")
+        plt.ylabel("Время, с")
+        plt.title(name)
+        plt.legend()
+        plt.grid(True)
+        plt.show()
     # TODO: построить log-log графики (matplotlib) по классам входов;
     # TODO: сопоставить наклоны с O(n^2) и O(n log n), объяснить расхождения
     #       (в т. ч. лучший случай вставок и поведение пузырька на упорядоченном входе);
