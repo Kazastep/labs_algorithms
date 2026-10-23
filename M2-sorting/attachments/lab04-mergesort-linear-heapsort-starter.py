@@ -24,16 +24,39 @@ def merge(left: list, right: list, key) -> list:
     """Стабильное слияние двух отсортированных списков в новый список.
 
     Стабильность: при равенстве ключей элемент из left идёт раньше.
-    Ожидаемая сложность: TODO (обосновать в отчёте).
+    Ожидаемая сложность: O(n).
     """
     # TODO: два индекса, сравнение key(left[i]) <= key(right[j])
-    raise NotImplementedError
+    merge_arr = []
+    i = 0
+    j = 0
+
+    while i < len(left) and j < len(right):
+        if key(left[i]) <= key(right[j]):
+            merge_arr.append(left[i])
+            i += 1
+        else:
+            merge_arr.append(right[j])
+            j += 1
+
+    merge_arr.extend(left[i:])
+    merge_arr.extend(right[j:])
+
+    return merge_arr
+
+
+
 
 
 def merge_sort(a: list, key=lambda x: x) -> list:
     """MergeSort: возвращает новый отсортированный список. Ожидаемая сложность: TODO."""
     # TODO: рекурсивное деление пополам + merge()
-    raise NotImplementedError
+    mid = len(a) // 2
+    left = a[:mid]
+    right = a[mid:]
+
+    return merge(left, right, key)
+
 
 
 def counting_sort(a: list[int], key_max: int) -> list[int]:
