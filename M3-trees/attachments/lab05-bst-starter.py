@@ -17,6 +17,7 @@ import statistics
 import sys
 import time
 import traceback
+import matplotlib.pyplot as plt
 from collections import deque
 
 # ---------------------------------------------------------------------------
@@ -220,7 +221,7 @@ class BST:
     def in_order(self) -> list[int]:
         result = []
 
-        def traverse(node: Node):
+        def traverse(node: Node | None):
             if node is None:
                 return 
             traverse(node.left)
@@ -235,7 +236,7 @@ class BST:
         """Прямой обход (узел — лево — право): рекурсивно."""
         result = []
 
-        def traverse(node: Node):
+        def traverse(node: Node | None):
             if node is None:
                 return 
             result.append(node.key)
@@ -250,7 +251,7 @@ class BST:
         """Обратный обход (лево — право — узел): рекурсивно."""
         result = []
 
-        def traverse(node: Node):
+        def traverse(node: Node | None):
             if node is None:
                 return 
             traverse(node.left)
@@ -288,13 +289,31 @@ class BST:
 
         Пустое дерево имеет высоту -1, дерево из одного узла — 0.
         """
-        
-        
+        def traverse(node: Node | None) -> int:
+            if node is None:
+                return -1
+
+            left_height = traverse(node.left)
+            right_height = traverse(node.right)
+            return 1 + max(left_height, right_height)
+
+        return traverse(self.root)
+            
 
     def size(self) -> int:
         """Число узлов в дереве."""
-        # TODO
-        raise NotImplementedError
+        result = 0
+        def traverse(node: Node | None):
+            nonlocal result
+
+            if node is None:
+                return 
+            result += 1
+            traverse(node.left)
+            traverse(node.right)
+                
+        traverse(self.root)
+        return result
 
 
 # ---------------------------------------------------------------------------
@@ -305,6 +324,26 @@ class BST:
 class SelfCheckError(Exception):
     """Нарушен контракт или инвариант реализации."""
 
+def check_bst_invariant(tree: BST) -> None:
+    """Проверка правильности расположения ключей в BST."""
+
+    def validate(node: Node | None, low: int | None, high: int | None) -> bool:
+        if node is None:
+            return True
+
+        if low is not None and node.key <= low:
+            return False
+
+        if high is not None and node.key >= high:
+            return False
+
+        return (
+            validate(node.left, low, node.key)
+            and validate(node.right, node.key, high)
+        )
+
+    if not validate(tree.root, None, None):
+        raise SelfCheckError("Нарушен инвариант BST")
 
 def expect(condition: bool, message: str) -> None:
     """Явная проверка вместо assert: assert-ы исчезают при запуске python -O."""
@@ -484,41 +523,56 @@ def check_against_reference() -> None:
         expect(low <= got <= high,
                f"{where}: height() = {got} при {n} узлах, возможно от {low} до {high}")
 
+def check_custom_invariant() -> None:
+        """Проверка BST после вставки и удаления."""
+        tree = BST()
+
+        for key in [8, 3, 12, 1, 6, 10, 15]:
+            tree.insert(key)
+            check_bst_invariant(tree)
+
+        for key in [1, 12, 8, 3, 6, 10, 15]:
+            tree.delete(key)
+            check_bst_invariant(tree)
+
+        if tree.size() != 0:
+            raise SelfCheckError("Дерево не пустое после удаления")
 
 def self_check() -> None:
-    """Все проверки по разделам; при любой ошибке замеры не выполняются."""
-    checks = (
-        ("вставка и поиск", check_insert_search),
-        ("обходы", check_traversals),
-        ("высота и размер", check_height_size),
-        ("удаление", check_delete),
-        ("удаление узла с двумя детьми", check_delete_two_children),
-        ("сверка с эталоном set/sorted", check_against_reference),
-    )
-    failed = 0
-    print("self_check:")
-    for name, check in checks:
-        try:
-            check()
-        except NotImplementedError as err:
-            where = traceback.extract_tb(err.__traceback__)[-1].name
-            print(f"  {name}: не реализовано — {where} (TODO)")
-            failed += 1
-        except SelfCheckError as err:
-            print(f"  {name}: ОШИБКА — {err}")
-            failed += 1
-        except Exception:  # noqa: BLE001 — падение реализации тоже результат проверки
-            print(f"  {name}: ИСКЛЮЧЕНИЕ")
-            traceback.print_exc(file=sys.stdout)
-            failed += 1
-        else:
-            print(f"  {name}: OK")
-    # TODO: добавить собственные проверки (например, инвариант BST после каждой
-    #       операции рекурсивной проверкой с границами) и описать их в отчёте.
-    if failed:
-        raise SystemExit(f"self_check: не пройдено разделов — {failed}; "
-                         f"замеры выполняются только после всех проверок.")
-    print("self_check: OK")
+        """Все проверки по разделам; при любой ошибке замеры не выполняются."""
+        checks = (
+            ("вставка и поиск", check_insert_search),
+            ("обходы", check_traversals),
+            ("высота и размер", check_height_size),
+            ("удаление", check_delete),
+            ("удаление узла с двумя детьми", check_delete_two_children),
+            ("сверка с эталоном set/sorted", check_against_reference),
+            ("проверка инварианта BST", check_custom_invariant)
+        )
+        failed = 0
+        print("self_check:")
+        for name, check in checks:
+            try:
+                check()
+            except NotImplementedError as err:
+                where = traceback.extract_tb(err.__traceback__)[-1].name
+                print(f"  {name}: не реализовано — {where} (TODO)")
+                failed += 1
+            except SelfCheckError as err:
+                print(f"  {name}: ОШИБКА — {err}")
+                failed += 1
+            except Exception:  # noqa: BLE001 — падение реализации тоже результат проверки
+                print(f"  {name}: ИСКЛЮЧЕНИЕ")
+                traceback.print_exc(file=sys.stdout)
+                failed += 1
+            else:
+                print(f"  {name}: OK")
+        # TODO: добавить собственные проверки (например, инвариант BST после каждой
+        #       операции рекурсивной проверкой с границами) и описать их в отчёте.
+        if failed:
+            raise SystemExit(f"self_check: не пройдено разделов — {failed}; "
+                            f"замеры выполняются только после всех проверок.")
+        print("self_check: OK")
 
 
 # ---------------------------------------------------------------------------
@@ -545,6 +599,10 @@ def run_benchmarks(seed: int) -> None:
     """Сравнение времени QUERIES поисков в BST и в списке (оператор in)."""
     rng = random.Random(seed)
     print(f"{'n':>8} {'h(BST)':>7} {'t_bst, c':>10} {'t_list, c':>10}")
+    sizes = []
+    bst_times = []
+    list_times = []
+    heights = []
     for n in SIZES:
         keys = rng.sample(range(10 * n), n)   # случайные ключи без повторов
         queries = [rng.randint(0, 10 * n) for _ in range(QUERIES)]
@@ -560,8 +618,55 @@ def run_benchmarks(seed: int) -> None:
             for q in queries:
                 q in keys  # линейный поиск для сравнения
 
-        print(f"{n:>8} {tree.height():>7} "
-              f"{bench(search_bst):>10.6f} {bench(search_list):>10.6f}")
+        t_bst = bench(search_bst)
+        t_list = bench(search_list)
+        h = tree.height()
+
+        sizes.append(n)
+        bst_times.append(t_bst)
+        list_times.append(t_list)
+        heights.append(h)
+
+        print(f"{n:>8} {h:>7} "
+            f"{t_bst:>10.6f} {t_list:>10.6f}")
+    # График 1. Сравнение времени поиска
+    plt.figure(figsize=(9, 5))
+
+    plt.plot(sizes, bst_times, marker="o", label="BST")
+    plt.plot(sizes, list_times, marker="o", label="Список")
+
+    plt.xlabel("Количество элементов (n)")
+    plt.ylabel("Время поиска (с)")
+    plt.title("Сравнение времени поиска: BST и список")
+
+    plt.legend()
+    plt.grid(True)
+
+    plt.savefig("bst_vs_list.png", dpi=150, bbox_inches="tight")
+    plt.show()
+
+    # График 2. Зависимость высоты BST от числа узлов
+    import math
+
+    plt.figure(figsize=(9, 5))
+
+    plt.plot(sizes, heights, marker="o", label="Высота BST")
+    plt.plot(
+        sizes,
+        [math.log2(n) for n in sizes],
+        linestyle="--",
+        label="log2(n)"
+    )
+
+    plt.xlabel("Количество узлов (n)")
+    plt.ylabel("Высота дерева (число рёбер)")
+    plt.title("Зависимость высоты BST от количества узлов")
+
+    plt.legend()
+    plt.grid(True)
+
+    plt.savefig("bst_height.png", dpi=150, bbox_inches="tight")
+    plt.show()
     # TODO: оформить результаты таблицей/графиком в отчёте;
     # TODO: сопоставить рост t_bst с высотой дерева, а t_list — с n;
     # TODO: в отчёте объяснить деградацию BST на упорядоченных ключах
