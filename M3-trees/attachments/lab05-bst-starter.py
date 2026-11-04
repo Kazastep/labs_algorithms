@@ -218,24 +218,68 @@ class BST:
     # -- Обходы --------------------------------------------------------------
 
     def in_order(self) -> list[int]:
-        """Симметричный обход (лево — узел — право): рекурсивно."""
-        # TODO: для корректного BST результат — возрастающая последовательность
-        raise NotImplementedError
+        result = []
 
+        def traverse(node: Node):
+            if node is None:
+                return 
+            traverse(node.left)
+            result.append(node.key)
+            traverse(node.right)
+            return result
+            
+        traverse(self.root)
+        return result
+    
     def pre_order(self) -> list[int]:
         """Прямой обход (узел — лево — право): рекурсивно."""
-        # TODO
-        raise NotImplementedError
+        result = []
+
+        def traverse(node: Node):
+            if node is None:
+                return 
+            result.append(node.key)
+            traverse(node.left)
+            traverse(node.right)
+            return result
+            
+        traverse(self.root)
+        return result 
 
     def post_order(self) -> list[int]:
         """Обратный обход (лево — право — узел): рекурсивно."""
-        # TODO
-        raise NotImplementedError
+        result = []
+
+        def traverse(node: Node):
+            if node is None:
+                return 
+            traverse(node.left)
+            traverse(node.right)
+            result.append(node.key)
+            return result
+            
+        traverse(self.root)
+        return result 
 
     def level_order(self) -> list[int]:
         """Обход в ширину по уровням: итеративно через очередь (deque)."""
         # TODO: использовать collections.deque, без рекурсии
-        raise NotImplementedError
+        result = []
+        queue = deque()
+
+        if self.root is None:
+            return result
+
+        queue.append(self.root)
+        while queue:
+            value = queue.popleft()
+            if value.left:
+                queue.append(value.left)
+            if value.right:
+                queue.append(value.right)
+            result.append(value.key)
+
+        return result
 
     # -- Характеристики дерева ----------------------------------------------
 
@@ -244,8 +288,8 @@ class BST:
 
         Пустое дерево имеет высоту -1, дерево из одного узла — 0.
         """
-        # TODO
-        raise NotImplementedError
+        
+        
 
     def size(self) -> int:
         """Число узлов в дереве."""
