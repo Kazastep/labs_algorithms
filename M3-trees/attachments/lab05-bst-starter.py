@@ -40,8 +40,12 @@ class BST:
     """Бинарное дерево поиска без дубликатов ключей.
 
     Инвариант: для каждого узла все ключи левого поддерева меньше key,
-    все ключи правого — больше. Ожидаемая сложность операций: TODO
-    (выразить через высоту h и обосновать в отчёте).
+    все ключи правого — больше. 
+    Сложность операций:
+    - insert, search, delete: O(h + 1), где h — высота дерева;
+    - в среднем для случайного BST: O(log n);
+    - в худшем случае: O(n), когда дерево вырождается в цепочку;
+    - обходы, height и size: O(n).
     """
 
     def __init__(self) -> None:
@@ -90,135 +94,180 @@ class BST:
             else:
                 return True
 
-    def delete(self, key: int) -> None:
-        """Удаление ключа. Обработать три случая:
+    # def delete(self, key: int) -> None:
+    #     """Удаление ключа. Обработать три случая:
 
-        1) лист — просто отцепить от родителя;
-        2) один ребёнок — заменить узел его ребёнком;
-        3) два ребёнка — заменить ключ преемником (минимум правого
-           поддерева) и удалить преемника из правого поддерева.
-        Отсутствующий ключ игнорируется.
-        """
-        # TODO: реализовать все три случая
-        if self.root is None:
-            return
+    #     1) лист — просто отцепить от родителя;
+    #     2) один ребёнок — заменить узел его ребёнком;
+    #     3) два ребёнка — заменить ключ преемником (минимум правого
+    #        поддерева) и удалить преемника из правого поддерева.
+    #     Отсутствующий ключ игнорируется.
+    #     """
+    #     # TODO: реализовать все три случая
+    #     if self.root is None:
+    #         return
         
-        i = self.root # Корень дерева
-        pr = None # Предыдущее дерево
-        ir = i.right # Правое поддерево
-        il = i.left # Левое поддерево
-        side = None # Сторона прохода
+    #     i = self.root # Корень дерева
+    #     pr = None # Предыдущее дерево
+    #     ir = i.right # Правое поддерево
+    #     il = i.left # Левое поддерево
+    #     side = None # Сторона прохода
 
-        while True:
-            if i.key > key:
-                if il is not None:
-                    pr = i # Присваивание прошлого узла
-                    i = il 
-                    il = i.left 
-                    ir = i.right
-                    side = "left"
-                else:
-                    return
-            elif i.key < key:
-                if ir is not None:
-                    pr = i
-                    i = ir
-                    ir = i.right
-                    il = i.left
-                    side = "right"
-                else:
-                    return
-            elif i.key == key:
-                if pr is not None:
-                    if side == "right":
-                        # Если нет поддереьев
-                        if il is None and ir is None:
-                            pr.right = None
-                        # Если есть левое поддерево
-                        elif il and ir is None:
-                                pr.right = il
-                        # Если есть правое поддерево
-                        elif ir and il is None:
-                            pr.right = ir
-                        # Если есть два поддерева
-                        else:
-                            # Если приемник в глубине правого дерева
-                            if ir.left:
-                                temp = i.right
-                                pr_temp = i
-                                while temp.left is not None:
-                                    pr_temp = temp
-                                    temp = temp.left
+    #     while True:
+    #         if i.key > key:
+    #             if il is not None:
+    #                 pr = i # Присваивание прошлого узла
+    #                 i = il 
+    #                 il = i.left 
+    #                 ir = i.right
+    #                 side = "left"
+    #             else:
+    #                 return
+    #         elif i.key < key:
+    #             if ir is not None:
+    #                 pr = i
+    #                 i = ir
+    #                 ir = i.right
+    #                 il = i.left
+    #                 side = "right"
+    #             else:
+    #                 return
+    #         elif i.key == key:
+    #             if pr is not None:
+    #                 if side == "right":
+    #                     # Если нет поддереьев
+    #                     if il is None and ir is None:
+    #                         pr.right = None
+    #                     # Если есть левое поддерево
+    #                     elif il and ir is None:
+    #                             pr.right = il
+    #                     # Если есть правое поддерево
+    #                     elif ir and il is None:
+    #                         pr.right = ir
+    #                     # Если есть два поддерева
+    #                     else:
+    #                         # Если приемник в глубине правого дерева
+    #                         if ir.left:
+    #                             temp = i.right
+    #                             pr_temp = i
+    #                             while temp.left is not None:
+    #                                 pr_temp = temp
+    #                                 temp = temp.left
 
-                                pr_temp.left = temp.right
-                                i.key = temp.key
+    #                             pr_temp.left = temp.right
+    #                             i.key = temp.key
 
-                            # Если приемник в правом поддерерве
-                            elif ir.left is None:
-                                temp = i.right
-                                i.key = temp.key
-                                i.right = temp.right
+    #                         # Если приемник в правом поддерерве
+    #                         elif ir.left is None:
+    #                             temp = i.right
+    #                             i.key = temp.key
+    #                             i.right = temp.right
 
-                    elif side == "left":
-                        # Если нет поддереьев
-                        if il is None and ir is None:
-                            pr.left = None
-                        # Если есть левое поддерево
-                        elif il and ir is None:
-                                pr.left = il
-                        # Если есть правое поддерево
-                        elif ir and il is None:
-                            pr.left = ir
-                        # Если есть два поддерева
-                        else:
-                            # Если приемник в глубине правого дерева
-                            if ir.left:
-                                temp = i.right
-                                pr_temp = i
-                                while temp.left is not None:
-                                    pr_temp = temp
-                                    temp = temp.left
+    #                 elif side == "left":
+    #                     # Если нет поддереьев
+    #                     if il is None and ir is None:
+    #                         pr.left = None
+    #                     # Если есть левое поддерево
+    #                     elif il and ir is None:
+    #                             pr.left = il
+    #                     # Если есть правое поддерево
+    #                     elif ir and il is None:
+    #                         pr.left = ir
+    #                     # Если есть два поддерева
+    #                     else:
+    #                         # Если приемник в глубине правого дерева
+    #                         if ir.left:
+    #                             temp = i.right
+    #                             pr_temp = i
+    #                             while temp.left is not None:
+    #                                 pr_temp = temp
+    #                                 temp = temp.left
 
-                                pr_temp.left = temp.right
-                                i.key = temp.key
+    #                             pr_temp.left = temp.right
+    #                             i.key = temp.key
 
-                            # Если приемник в правом поддерерве
-                            elif ir.left is None:
-                                temp = i.right
-                                i.key = temp.key
-                                i.right = temp.right
+    #                         # Если приемник в правом поддерерве
+    #                         elif ir.left is None:
+    #                             temp = i.right
+    #                             i.key = temp.key
+    #                             i.right = temp.right
 
-                else:
+    #             else:
 
-                    if il is None and ir is None:
-                        self.root = None
+    #                 if il is None and ir is None:
+    #                     self.root = None
 
-                    elif il and ir is None:
-                        self.root = il
+    #                 elif il and ir is None:
+    #                     self.root = il
                         
-                    elif ir and il is None:
-                        self.root = ir
+    #                 elif ir and il is None:
+    #                     self.root = ir
 
-                    elif il and ir:
-                        if ir.left:
-                            temp = i.right
-                            pr_temp = i
-                            while temp.left is not None:
-                                pr_temp = temp
-                                temp = temp.left
+    #                 elif il and ir:
+    #                     if ir.left:
+    #                         temp = i.right
+    #                         pr_temp = i
+    #                         while temp.left is not None:
+    #                             pr_temp = temp
+    #                             temp = temp.left
 
-                            pr_temp.left = temp.right
-                            i.key = temp.key
-                        else:   
-                            temp = i.right
-                            i.key = temp.key
-                            i.right = temp.right
+    #                         pr_temp.left = temp.right
+    #                         i.key = temp.key
+    #                     else:   
+    #                         temp = i.right
+    #                         i.key = temp.key
+    #                         i.right = temp.right
 
-                break
+    #             break
+
+
+    def delete(self, key: int) -> None:
+        """Удаление ключа из BST."""
+        current = self.root
+        parent = None
+        while current is not None and current.key != key:
+            parent = current
+
+            if key < current.key:
+                current = current.left
+            else:
+                current = current.right
+
+        if current is None:
+            return
+        # Удаление узла с двумя детьми
+        if current.left is not None and current.right is not None:
+            successor_parent = current
+            successor = current.right
+
+            while successor.left is not None:
+                successor_parent = successor
+                successor = successor.left
+
+            current.key = successor.key
+            current = successor
+            parent = successor_parent
+
+        # Удаление узла с нулём или одним ребёнком
+        if current.left is not None:
+            child = current.left
+        else:
+            child = current.right
+
+        # Подключение ребёнка к родителю
+        if parent is None:
+            self.root = child
+
+        elif parent.left is current:
+           parent.left = child
+
+        else:
+            parent.right = child
 
     # -- Обходы --------------------------------------------------------------
 
     def in_order(self) -> list[int]:
+        """Симметричеый обход (левое - узел - правое)."""
         result = []
 
         def traverse(node: Node | None):
