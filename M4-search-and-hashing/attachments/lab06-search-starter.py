@@ -28,10 +28,17 @@ def linear_search(a: list[int], key: int) -> tuple[int, int]:
     """Линейный поиск первого вхождения key.
 
     Возвращает (индекс первого вхождения или -1, число сравнений ключей).
-    Ожидаемая сложность: TODO (обосновать в отчёте).
+    Ожидаемая сложность: O(n).
     """
     # TODO: реализовать проход слева направо со счётчиком сравнений
-    raise NotImplementedError
+    count = 0
+    len_arr = len(a)
+    for ind in range(len_arr):
+        count += 1
+        if a[ind] == key:
+            return ind, count
+    
+    return -1, count
 
 
 def binary_search(a: list[int], key: int) -> tuple[int, int]:
@@ -40,12 +47,25 @@ def binary_search(a: list[int], key: int) -> tuple[int, int]:
     Возвращает (индекс любого вхождения или -1, число сравнений ключей).
     Аккуратно поддерживайте инвариант обеих границ lo и hi: искомый элемент,
     если он есть, всегда лежит в текущем отрезке; цикл обязан завершаться.
-    Ожидаемая сложность: TODO.
+    Ожидаемая сложность: O(log n).
     """
     # TODO: реализовать через инвариант границ lo <= hi (или lo < hi — но
     # TODO: тогда согласовать вычисление mid и сужение отрезка!)
-    raise NotImplementedError
-
+    count = 0
+    lo = 0
+    hi = len(a) - 1
+    while lo <= hi:
+        mid = (lo + hi) // 2
+        count += 1
+        if key > a[mid]:
+            lo = mid + 1
+        else:
+            count += 1
+            if key < a[mid]:
+                hi = mid - 1
+            else:
+                return mid, count
+    return -1, count
 
 def interpolation_search(a: list[int], key: int) -> tuple[int, int]:
     """Интерполяционный поиск key в отсортированном массиве.
