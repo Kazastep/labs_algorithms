@@ -17,6 +17,8 @@ import random
 import statistics
 import time
 from pathlib import Path
+from collections import Counter
+
 
 # ---------------------------------------------------------------------------
 # 0. Загрузка проверяемого кода
@@ -45,19 +47,27 @@ quicksort = load_quicksort()
 def is_sorted(a: list[int]) -> bool:
     """Инвариант 1: последовательность упорядочена по неубыванию."""
     # TODO: реализовать проверку соседних пар
-    raise NotImplementedError
+    for i in range(1, len(a)):
+        if a[i - 1] > a[i]:
+            return False
+    return True
 
 
 def same_multiset(a: list[int], b: list[int]) -> bool:
     """Инвариант 2: b — перестановка a (мультимножества элементов совпадают)."""
     # TODO: реализовать через collections.Counter
-    raise NotImplementedError
+    return Counter(a) == Counter(b)
 
 
 def check_invariants(original: list[int], result: list[int]) -> list[str]:
     """Возвращает список нарушенных инвариантов (пустой список — нарушений нет)."""
     # TODO: проверить оба инварианта и вернуть понятные сообщения о нарушениях
-    raise NotImplementedError
+    errors =[]
+    if not is_sorted(result):
+        errors.append("Нарушен порядок")
+    if not same_multiset(original, result):
+        errors.append("Нарушено мультимножество")
+    return errors
 
 
 # ---------------------------------------------------------------------------
@@ -74,14 +84,46 @@ def representative_cases(rng: random.Random) -> list[tuple[str, list[int]]]:
     числами (генерируются через rng — seed по варианту).
     """
     # TODO: вернуть список пар (название класса, вход)
-    raise NotImplementedError
+    cases = [
+        # Граничные случаи
+        ("Пустой массив", []),
+        ("Один элемент", [5]),
+        ("Два элемента", [2, 1]),
+        ("Два одинаковых элемента", [2, 2]),
+
+        # Вырожденные случаи
+        ("Все элементы равны", [5] * 20),
+        ("Отсортированный", list(range(20))),
+        ("Обратно отсортированный", list(range(19, -1, -1))),
+
+        # Типовые случаи
+        ("С дубликатами", [3, 1, 3, 2, 1, 2]),
+        ("С отрицательными числами", [-5, 3, -2, 0, -1]),
+    ]
+
+    # Случайные массивы с воспроизводимыми значениями
+    for n in (10, 50, 100):
+        a = [rng.randint(-10, 10) for _ in range(n)]
+        cases.append((f"Случайный массив n={n}", a))
+
+    return cases
 
 
 def run_representative_tests(rng: random.Random) -> None:
     """Прогоняет quicksort по всем классам входов и печатает нарушения инвариантов."""
     # TODO: для каждого входа вызвать quicksort и check_invariants;
     # TODO: зафиксировать, какой класс входов вскрывает какой дефект.
-    raise NotImplementedError
+    cases = representative_cases(rng)
+    for name, a in cases:
+        result = quicksort(a)
+        errors = check_invariants(a, result)
+    if errors:
+        print(f"FAIL: {name}")
+        print(f"  Вход: {a}")
+        print(f"  Результат: {result}")
+        print(f"  Нарушения: {errors}")
+    else:
+        print(f"OK: {name}")
 
 
 # ---------------------------------------------------------------------------
@@ -99,8 +141,25 @@ def compare_with_reference(rng: random.Random, runs: int = 300) -> None:
     """
     # TODO: цикл на runs итераций: вход -> quicksort(вход) vs sorted(вход);
     # TODO: подсчитать и напечатать число расхождений и минимальный контрпример.
-    raise NotImplementedError
+    mismatches = 0
+    min_case = None
 
+    for _ in range(runs):
+        n = rng.randint(0, 30)
+        a = [rng.randint(-10, 10) for _ in range(n)]
+
+        result = quicksort(a)
+        expected = sorted(a)
+
+        if result != expected:
+            mismatches += 1
+            print(a, result, expected)
+            if min_case is None or len(a) < len(min_case):
+                min_case = a.copy()
+
+    print(f"Всего тестов: {runs}")
+    print(f"Расхождений: {mismatches}")    
+    print(f"Минимальный найденный контрпример: {min_case}")
 
 # ---------------------------------------------------------------------------
 # 4. Шаг 4 методики: бенчмарк на трёх классах входов
@@ -134,20 +193,37 @@ def bench(fn, data: list[int]) -> float:
 
 
 def run_benchmarks(seed: int) -> None:
-    """Замеры quicksort на трёх классах входов; аварийные завершения фиксируются."""
+    """Замеры QuickSort и анализ роста времени выполнения."""
     rng = random.Random(seed)
+
     for kind in INPUT_KINDS:
-        print(f"\nкласс входа: {kind}")
+        print(f"\nКласс входа: {kind}")
+
+        previous_time = None
+        previous_n = None
+
         for n in SIZES:
             data = make_input(rng, n, kind)
+
             try:
-                print(f"  n={n:>6}  t={bench(quicksort, data):.6f} c")
+                current_time = bench(quicksort, data)
+
+                print(f"  n={n:>6}  t={current_time:.6f} c", end="")
+
+                if previous_time is not None:
+                    ratio = current_time / previous_time
+                    print(f"  рост времени: x{ratio:.2f}")
+                else:
+                    print()
+
+                previous_time = current_time
+                previous_n = n
+
             except RecursionError:
-                # Аварийное завершение — тоже результат верификации:
-                # зафиксируйте его в отчёте вместе с размером входа.
                 print(f"  n={n:>6}  RecursionError")
-    # TODO: сопоставить рост времени по классам входов с заявленной в docstring
-    # TODO: оценкой O(n log n); объяснить наблюдаемую деградацию и её причину в коде.
+                previous_time = None
+                previous_n = None
+
 
 
 # ---------------------------------------------------------------------------
