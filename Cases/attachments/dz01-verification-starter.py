@@ -26,7 +26,8 @@ from collections import Counter
 # Имя файла содержит дефисы, поэтому обычный import не подходит —
 # модуль загружается по пути через importlib.
 
-AI_CODE_PATH = Path(__file__).with_name("dz01-ai-code.py")
+# AI_CODE_PATH = Path(__file__).with_name("dz01-ai-code.py")
+AI_CODE_PATH = Path(__file__).with_name("dz01-ai-code-fixed.py")
 
 
 def load_quicksort():
